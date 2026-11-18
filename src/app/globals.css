@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+@theme {
+  --color-space: #0a0b1e;
+  --color-space-2: #12142e;
+  --color-violet: #6c5ce7;
+  --color-cyan: #00d4ff;
+  --color-ice: #eef0ff;
+  --color-mute: #9aa0c7;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html { color-scheme: dark; }
+body { background: var(--color-space); color: var(--color-ice); font-family: var(--font-sans); overflow-x: clip; }
+::selection { background: var(--color-violet); color: #fff; }
+
+@utility text-gradient {
+  background: linear-gradient(100deg, #c9b8ff 0%, #6c5ce7 35%, #00d4ff 70%, #c9b8ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-ice px-6 py-3 text-sm font-semibold text-space transition-all duration-300;
+  box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  &:hover { box-shadow: 0 0 30px 4px rgba(108, 92, 231, .55); transform: translateY(-1px); }
+}
+@utility btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/10;
+}
+@utility panel {
+  @apply rounded-3xl border border-white/10 bg-white/[.035] backdrop-blur-xl;
+}
+@utility eyebrow {
+  @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs uppercase tracking-widest text-mute;
+}
+
+/* Spotlight cards: a glowing border + inner light that follow the cursor (set --x/--y from JS). */
+.glow { position: relative; --x: -999px; --y: -999px; }
+.glow::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: radial-gradient(420px circle at var(--x) var(--y), rgba(160, 140, 255, .9), transparent 40%), rgba(255, 255, 255, .08);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.glow::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(500px circle at var(--x) var(--y), rgba(108, 92, 231, .14), transparent 45%);
+}
+
+/* Animated conic border for the featured pricing plan */
+@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+.conic { position: relative; }
+.conic::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--angle), #6c5ce7, #00d4ff, #c9b8ff, #6c5ce7);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: spin-angle 4s linear infinite;
+}
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+/* CSS stand-in for the WebGL orb (dark core, glowing violet/white rim, slow morph). */
+.orb-poster {
+  width: 52vh; height: 52vh; translate: -50% -50%;
+  border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
+  background:
+    radial-gradient(circle at 38% 35%, rgba(0, 212, 255, .16), transparent 45%),
+    radial-gradient(circle at 62% 66%, rgba(108, 92, 231, .22), transparent 50%),
+    radial-gradient(circle, #0c0e26 55%, #2a2160 78%, #6c5ce7 100%);
+  box-shadow: 0 0 0 1px rgba(201, 184, 255, .35), 0 0 40px 6px rgba(201, 184, 255, .45), 0 0 120px 20px rgba(108, 92, 231, .35), inset 0 0 30px 6px rgba(220, 210, 255, .55);
+  animation: orb-morph 8s ease-in-out infinite alternate;
+}
+@keyframes orb-morph { to { border-radius: 54% 46% 47% 53% / 46% 55% 45% 54%; rotate: 25deg; } }
+@media (max-width: 767px) { .orb-poster { width: 34vh; height: 34vh; top: calc(50% + 1.5vh); } }
+
+/* Hero intro: hide the animated bits until JS takes over, so they don't flash visible then re-animate.
+   `js` is only set when motion is allowed; a CSS fallback reveals them anyway if the script never runs. */
+html.js:not(.hero-go) .hero-in, html.js:not(.hero-go) .hero-late, html.js:not(.hero-go) [data-text] { opacity: 0; animation: hero-fallback 0s 4s forwards; }
+@keyframes hero-fallback { to { opacity: 1; } }
+
+.split-line-mask { padding-bottom: .1em; margin-bottom: -.1em; }
+@media (prefers-reduced-motion: no-preference) { [data-split] { visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
